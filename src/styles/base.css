@@ -115,6 +115,90 @@
     font-weight: var(--shiki-dark-font-weight) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
   }
+
+  /* ===== Print Styles ===== */
+  @media print {
+    /* Hide elements not needed for print */
+    body > header,
+    body > footer,
+    #theme-btn, /* Assuming this is the ID for the theme toggle */
+    .share-buttons, /* Use the actual selector for your share buttons */
+    .giscus, /* Use the actual selector for your comments */
+    #print-button, /* Hide the print button itself */
+    nav, /* Hide navigation */
+    aside /* Hide potential sidebars */ {
+      display: none !important;
+    }
+
+    /* Ensure main content takes full width and reset margins/padding */
+    main#main-content, /* Use the actual selector for your main content area */
+    .prose {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border: none !important;
+      font-size: 12pt; /* Adjust font size for print if needed */
+      color: #000 !important; /* Ensure text is black for printing */
+    }
+
+    /* Ensure links are visible and underlined */
+    a {
+      color: #000 !important;
+      text-decoration: underline !important;
+    }
+
+    /* Optionally display URL for links */
+    a[href^="http"]:after {
+      content: " (" attr(href) ")";
+      font-size: 90%;
+      color: #555;
+    }
+    /* Avoid displaying for internal links */
+    a[href^="#"]:after {
+      content: "";
+    }
+
+    /* Improve page break behavior */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+    img,
+    figure,
+    table,
+    pre {
+      page-break-inside: avoid;
+    }
+    ul,
+    ol,
+    blockquote {
+      page-break-before: avoid;
+    }
+
+    /* Reset background */
+    body,
+    html {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+
+    /* Ensure code blocks print reasonably */
+    .prose pre,
+    .prose code {
+      background-color: #f8f8f8 !important; /* Light background for code */
+      color: #000 !important;
+      border: 1px solid #ccc !important;
+      white-space: pre-wrap !important; /* Allow wrapping */
+      word-wrap: break-word !important;
+    }
+  }
 }
 
 @layer components {
