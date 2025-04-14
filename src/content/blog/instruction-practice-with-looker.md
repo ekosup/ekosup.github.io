@@ -4,7 +4,7 @@ pubDatetime: 2025-1-28T15:22:00Z
 modDatetime: 2025-1-29T09:12:47.400Z
 title: Instruksi - Memvisualisasikan data menggunakan Looker Studio
 slug: instruksi-memvisualisasikan-data-menggunakan-looker-studio
-featured: true
+featured: false
 draft: false
 tags:
   - pknstan
