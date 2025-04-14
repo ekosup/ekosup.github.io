@@ -1,6 +1,17 @@
 {
-  "name": "",
-  "version": "4.7.0",
+  "name": "ekosup-blog",
+  "description": "Personal blog of Eko Supriyono",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Eko Supriyono (https://ekosup.github.io/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekosup/ekosup.github.io.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ekosup/ekosup.github.io/issues"
+  },
+  "homepage": "https://ekosup.github.io/",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",

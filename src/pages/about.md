@@ -1,36 +1,23 @@
 ---
 layout: ../layouts/AboutLayout.astro
-title: "About"
+title: "About Me"
 ---
 
-AstroPaper is a minimal, responsive and SEO-friendly Astro blog theme. I designed and crafted this based on [my personal blog](https://satnaing.dev/blog).
+Hello! I'm Eko Supriyono, and I'm thrilled to welcome you to my personal blog! 👋
+I am passionate about sharing my knowledge and experiences with the world. I firmly believe that teaching others is one of the best ways to deepen my own understanding. By sharing what I learn, I aim to contribute to the community and create a space where we can all grow together.
 
-This theme is aimed to be accessible out of the box. Light and dark mode are supported by
-default and additional color schemes can also be configured.
+## My Journey
 
-This theme is self-documented \_ which means articles/posts in this theme can also be considered as documentations. So, see the documentation for more info.
+My journey in the tech world began with a simple curiosity about how things work. Over the years, I have explored various aspects of technology, from web development to software engineering. This blog serves as a platform for me to document my learning process, share insights, and connect with like-minded individuals.
 
-<div>
-  <img src="/assets/dev.svg" class="sm:w-1/2 mx-auto" alt="coding dev illustration">
-</div>
+## Tech Stuff!
 
-## Tech Stack
+This blog is built using Astro, a modern static site generator that allows me to create fast and optimized websites effortlessly. I chose Astro for its flexibility and performance, which perfectly aligns with my vision for this blog.
 
-This theme is written in vanilla JavaScript (+ TypeScript for type checking) and a little bit of ReactJS for some interactions. TailwindCSS is used for styling; and Markdown is used for blog contents.
+For styling, I utilize Tailwind CSS, a utility-first CSS framework that enables me to design responsive and aesthetically pleasing layouts efficiently. The original inspiration for this blog came from the AstroPaper theme, which provided a solid foundation that I could customize to reflect my personal style.
 
-## Features
+## What You'll Find Here
 
-Here are certain features of this site.
+On this blog, you can expect to find a variety of topics related to technology, programming tutorials, insights into the latest trends, and reflections on my personal growth journey. I aim to make complex concepts accessible and engaging, so whether you're a beginner or an experienced developer, there's something for everyone.
 
-- fully responsive and accessible
-- SEO-friendly
-- light & dark mode
-- fuzzy search
-- super fast performance
-- draft posts
-- pagination
-- sitemap & rss feed
-- highly customizable
-
-If you like this theme, you can star/contribute to the [repo](https://github.com/satnaing/astro-paper).  
-Or you can even give any feedback via my [email](mailto:contact@satnaing.dev).
+Thank you for stopping by! I hope you find the content here valuable and inspiring. Feel free to connect with me through the comments or on social media; I’d love to hear your thoughts and experiences!
