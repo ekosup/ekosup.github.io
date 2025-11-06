@@ -1,0 +1,153 @@
+---
+export const prerender = false;
+
+import Layout from "@layouts/Layout.astro";
+import { isAuthenticated } from "@utils/auth";
+
+// Redirect to login if not authenticated
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect("/admin/login");
+}
+---
+
+<Layout title="Admin Dashboard">
+  <main class="mx-auto max-w-5xl px-4 pb-12">
+    <section class="pt-12 pb-8">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-skin-accent">Admin Dashboard</h1>
+        <button
+          id="logout-btn"
+          class="rounded-md bg-red-600 px-4 py-2 text-white hover:bg-red-700 focus:outline-none"
+        >
+          Logout
+        </button>
+      </div>
+      <p class="text-skin-base">Manage your blog posts</p>
+    </section>
+
+    <div id="loading" class="text-center py-12">
+      <p class="text-skin-base">Loading posts...</p>
+    </div>
+
+    <div id="error" class="hidden text-red-500 py-4"></div>
+
+    <div id="posts-container" class="hidden">
+      <div class="mb-4">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search posts..."
+          class="w-full rounded-md border border-skin-line bg-skin-fill px-4 py-2 text-skin-base focus:border-skin-accent focus:outline-none"
+        />
+      </div>
+
+      <div class="bg-skin-card rounded-lg border border-skin-line overflow-hidden">
+        <table class="min-w-full divide-y divide-skin-line">
+          <thead class="bg-skin-accent/10">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-skin-base uppercase tracking-wider">
+                Filename
+              </th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-skin-base uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody id="posts-list" class="bg-skin-card divide-y divide-skin-line">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    interface BlogPost {
+      name: string;
+      path: string;
+      sha: string;
+    }
+
+    let allPosts: BlogPost[] = [];
+
+    // Logout functionality
+    const logoutBtn = document.getElementById("logout-btn");
+    logoutBtn?.addEventListener("click", async () => {
+      try {
+        const response = await fetch("/api/admin/logout", {
+          method: "POST",
+        });
+
+        if (response.ok) {
+          window.location.href = "/admin/login";
+        }
+      } catch (error) {
+        console.error("Logout error:", error);
+      }
+    });
+
+    // Load posts
+    async function loadPosts() {
+      const loading = document.getElementById("loading");
+      const error = document.getElementById("error");
+      const container = document.getElementById("posts-container");
+
+      try {
+        const response = await fetch("/api/admin/posts");
+        const data = await response.json();
+
+        if (response.ok) {
+          allPosts = data.posts;
+          displayPosts(allPosts);
+          loading?.classList.add("hidden");
+          container?.classList.remove("hidden");
+        } else {
+          throw new Error(data.error || "Failed to load posts");
+        }
+      } catch (err) {
+        loading?.classList.add("hidden");
+        if (error) {
+          error.textContent = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+          error.classList.remove("hidden");
+        }
+      }
+    }
+
+    function displayPosts(posts: BlogPost[]) {
+      const tbody = document.getElementById("posts-list");
+      if (!tbody) return;
+
+      tbody.innerHTML = posts
+        .map(
+          (post) => `
+        <tr class="hover:bg-skin-accent/5">
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-skin-base">
+            ${post.name}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <a
+              href="/admin/edit/${encodeURIComponent(post.name)}"
+              class="text-skin-accent hover:text-skin-accent/80 mr-4"
+            >
+              Edit
+            </a>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById("search-input") as HTMLInputElement;
+    searchInput?.addEventListener("input", (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase();
+      const filtered = allPosts.filter((post) =>
+        post.name.toLowerCase().includes(query)
+      );
+      displayPosts(filtered);
+    });
+
+    // Initialize
+    loadPosts();
+  </script>
+</Layout>
