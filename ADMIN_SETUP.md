@@ -24,17 +24,13 @@ cp .env.example .env
 
 #### Generate Admin Password Hash
 
-Use bcrypt to hash your password. You can use Node.js:
+Use the included script to generate a bcrypt password hash:
 
-```javascript
-const bcrypt = require('bcryptjs');
-const password = 'your-secure-password';
-bcrypt.hash(password, 10, (err, hash) => {
-  console.log(hash);
-});
+```bash
+node scripts/generate-password-hash.mjs your-secure-password
 ```
 
-Or use an online bcrypt generator (ensure it's a trusted source).
+This will output the hash to add to your `.env` file.
 
 Update `.env`:
 ```
