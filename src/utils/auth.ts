@@ -2,9 +2,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import type { AstroCookies } from "astro";
 
-const JWT_SECRET = import.meta.env.ADMIN_JWT_SECRET || "default-secret-key";
+const JWT_SECRET = import.meta.env.ADMIN_JWT_SECRET;
 const ADMIN_USERNAME = import.meta.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = import.meta.env.ADMIN_PASSWORD_HASH || "";
+
+if (!JWT_SECRET) {
+  throw new Error("ADMIN_JWT_SECRET environment variable is required for authentication");
+}
 
 export interface AuthToken {
   username: string;
@@ -23,10 +27,8 @@ export async function verifyCredentials(
     return false;
   }
 
-  // If no password hash is set, use default for development
   if (!ADMIN_PASSWORD_HASH) {
-    console.warn("No ADMIN_PASSWORD_HASH set, using default password");
-    return password === "admin123";
+    throw new Error("ADMIN_PASSWORD_HASH environment variable is required for authentication");
   }
 
   return await bcrypt.compare(password, ADMIN_PASSWORD_HASH);

@@ -2,7 +2,7 @@
 
 /**
  * Helper script to generate bcrypt password hash for admin authentication
- * Usage: node scripts/generate-password-hash.js <password>
+ * Usage: node scripts/generate-password-hash.mjs <password>
  */
 
 import bcrypt from 'bcryptjs';

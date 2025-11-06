@@ -122,7 +122,9 @@ const { filename } = Astro.params;
         if (response.ok) {
           currentSha = data.post.sha;
           originalContent = data.post.content || "";
-          contentTextarea.value = originalContent;
+          if (contentTextarea) {
+            contentTextarea.value = originalContent;
+          }
           
           loadingDiv?.classList.add("hidden");
           editorContainer?.classList.remove("hidden");
@@ -146,16 +148,22 @@ const { filename } = Astro.params;
 
       const formData = new FormData(form);
       const content = formData.get("content");
-      const commitMessage = formData.get("commitMessage") || `Update ${filename} via admin UI`;
+      // Sanitize filename for commit message
+      const safeFilename = filename.replace(/[^\w\-.]/g, '_');
+      const commitMessage = formData.get("commitMessage") || `Update ${safeFilename} via admin UI`;
 
       if (!content) {
-        formError.textContent = "Content is required";
-        formError?.classList.remove("hidden");
+        if (formError) {
+          formError.textContent = "Content is required";
+          formError.classList.remove("hidden");
+        }
         return;
       }
 
-      saveBtn.disabled = true;
-      saveBtn.textContent = "Saving...";
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+      }
 
       try {
         const response = await fetch(`/api/admin/posts/${encodeURIComponent(filename)}`, {
@@ -182,11 +190,15 @@ const { filename } = Astro.params;
           throw new Error(data.error || "Failed to save post");
         }
       } catch (err) {
-        formError.textContent = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
-        formError?.classList.remove("hidden");
+        if (formError) {
+          formError.textContent = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+          formError.classList.remove("hidden");
+        }
       } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = "Save Changes";
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = "Save Changes";
+        }
       }
     });
 
