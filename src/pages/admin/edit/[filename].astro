@@ -1,0 +1,231 @@
+---
+export const prerender = false;
+
+import Layout from "@layouts/Layout.astro";
+import { isAuthenticated } from "@utils/auth";
+
+// Redirect to login if not authenticated
+if (!isAuthenticated(Astro.cookies)) {
+  return Astro.redirect("/admin/login");
+}
+
+const { filename } = Astro.params;
+---
+
+<Layout title={`Edit ${filename}`}>
+  <main class="mx-auto max-w-5xl px-4 pb-12">
+    <section class="pt-12 pb-8">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-3xl font-bold text-skin-accent">Edit Post</h1>
+          <p class="text-skin-base mt-2" id="filename-display">{filename}</p>
+        </div>
+        <div class="flex gap-2">
+          <a
+            href="/admin"
+            class="rounded-md border border-skin-line bg-skin-fill px-4 py-2 text-skin-base hover:bg-skin-accent/10 focus:outline-none"
+          >
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <div id="loading" class="text-center py-12">
+      <p class="text-skin-base">Loading post...</p>
+    </div>
+
+    <div id="error" class="hidden text-red-500 py-4"></div>
+
+    <div id="editor-container" class="hidden">
+      <form id="edit-form" class="space-y-4">
+        <div>
+          <label for="commit-message" class="block text-sm font-medium text-skin-base mb-1">
+            Commit Message (optional)
+          </label>
+          <input
+            type="text"
+            id="commit-message"
+            name="commitMessage"
+            class="w-full rounded-md border border-skin-line bg-skin-fill px-4 py-2 text-skin-base focus:border-skin-accent focus:outline-none"
+            placeholder="Update blog post via admin UI"
+          />
+        </div>
+
+        <div>
+          <label for="content" class="block text-sm font-medium text-skin-base mb-1">
+            Markdown Content
+          </label>
+          <textarea
+            id="content"
+            name="content"
+            rows="25"
+            required
+            class="w-full rounded-md border border-skin-line bg-skin-fill px-4 py-2 text-skin-base font-mono text-sm focus:border-skin-accent focus:outline-none"
+            placeholder="Enter markdown content..."
+          ></textarea>
+        </div>
+
+        <div id="form-error" class="hidden text-red-500 text-sm"></div>
+
+        <div id="success-message" class="hidden text-green-600 text-sm">
+          Post updated successfully!
+        </div>
+
+        <div class="flex gap-4">
+          <button
+            type="submit"
+            id="save-btn"
+            class="rounded-md bg-skin-accent px-6 py-2 text-skin-inverted hover:bg-skin-accent/90 focus:outline-none focus:ring-2 focus:ring-skin-accent focus:ring-offset-2"
+          >
+            Save Changes
+          </button>
+          <button
+            type="button"
+            id="preview-btn"
+            class="rounded-md border border-skin-line bg-skin-fill px-6 py-2 text-skin-base hover:bg-skin-accent/10 focus:outline-none"
+          >
+            Preview
+          </button>
+        </div>
+      </form>
+
+      <div id="preview-container" class="hidden mt-8 border-t border-skin-line pt-8">
+        <h2 class="text-2xl font-bold text-skin-accent mb-4">Preview</h2>
+        <div id="preview-content" class="prose prose-lg max-w-none text-skin-base"></div>
+      </div>
+    </div>
+  </main>
+
+  <script define:vars={{ filename }}>
+    let currentSha = "";
+    let originalContent = "";
+
+    const loadingDiv = document.getElementById("loading");
+    const errorDiv = document.getElementById("error");
+    const editorContainer = document.getElementById("editor-container");
+    const contentTextarea = document.getElementById("content");
+    const form = document.getElementById("edit-form");
+    const formError = document.getElementById("form-error");
+    const successMessage = document.getElementById("success-message");
+    const saveBtn = document.getElementById("save-btn");
+    const previewBtn = document.getElementById("preview-btn");
+    const previewContainer = document.getElementById("preview-container");
+    const previewContent = document.getElementById("preview-content");
+
+    // Load post content
+    async function loadPost() {
+      try {
+        const response = await fetch(`/api/admin/posts/${encodeURIComponent(filename)}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          currentSha = data.post.sha;
+          originalContent = data.post.content || "";
+          contentTextarea.value = originalContent;
+          
+          loadingDiv?.classList.add("hidden");
+          editorContainer?.classList.remove("hidden");
+        } else {
+          throw new Error(data.error || "Failed to load post");
+        }
+      } catch (err) {
+        loadingDiv?.classList.add("hidden");
+        if (errorDiv) {
+          errorDiv.textContent = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+          errorDiv.classList.remove("hidden");
+        }
+      }
+    }
+
+    // Save post
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      formError?.classList.add("hidden");
+      successMessage?.classList.add("hidden");
+
+      const formData = new FormData(form);
+      const content = formData.get("content");
+      const commitMessage = formData.get("commitMessage") || `Update ${filename} via admin UI`;
+
+      if (!content) {
+        formError.textContent = "Content is required";
+        formError?.classList.remove("hidden");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+
+      try {
+        const response = await fetch(`/api/admin/posts/${encodeURIComponent(filename)}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content,
+            sha: currentSha,
+            commitMessage,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          successMessage?.classList.remove("hidden");
+          // Reload to get new SHA
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          throw new Error(data.error || "Failed to save post");
+        }
+      } catch (err) {
+        formError.textContent = `Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+        formError?.classList.remove("hidden");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Changes";
+      }
+    });
+
+    // Preview functionality (basic markdown rendering)
+    previewBtn?.addEventListener("click", () => {
+      const content = contentTextarea.value;
+      const isPreviewVisible = !previewContainer.classList.contains("hidden");
+
+      if (isPreviewVisible) {
+        previewContainer?.classList.add("hidden");
+        previewBtn.textContent = "Preview";
+      } else {
+        // Simple markdown to HTML conversion (basic)
+        const html = content
+          .split("\n")
+          .map(line => {
+            if (line.startsWith("# ")) return `<h1>${line.substring(2)}</h1>`;
+            if (line.startsWith("## ")) return `<h2>${line.substring(3)}</h2>`;
+            if (line.startsWith("### ")) return `<h3>${line.substring(4)}</h3>`;
+            if (line.trim() === "") return "<br>";
+            return `<p>${line}</p>`;
+          })
+          .join("\n");
+        
+        previewContent.innerHTML = html;
+        previewContainer?.classList.remove("hidden");
+        previewBtn.textContent = "Hide Preview";
+      }
+    });
+
+    // Warn before leaving if content has changed
+    window.addEventListener("beforeunload", (e) => {
+      if (contentTextarea?.value !== originalContent) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+
+    // Initialize
+    loadPost();
+  </script>
+</Layout>
